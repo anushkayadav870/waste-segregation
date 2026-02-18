@@ -1,0 +1,221 @@
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800&display=swap");
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: "Nunito", sans-serif;
+  background: #f1f3f7;
+  color: #2e3545;
+}
+
+.page-shell {
+  width: min(920px, calc(100% - 2rem));
+  margin: 2.4rem auto 3rem;
+}
+
+.page-title {
+  margin: 0;
+  text-align: center;
+  font-size: clamp(1.9rem, 3.4vw, 3.1rem);
+  color: #3d4657;
+}
+
+.upload-card,
+.comparison-card {
+  margin-top: 1.5rem;
+  background: #ffffff;
+  border: 1px solid #d9deea;
+  border-radius: 16px;
+  box-shadow: 0 8px 22px rgba(35, 42, 62, 0.08);
+}
+
+.upload-card {
+  padding: 1.2rem;
+}
+
+.drop-zone {
+  border: 2px dashed #c5ccdc;
+  border-radius: 14px;
+  min-height: 190px;
+  display: grid;
+  place-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+}
+
+.drop-zone input {
+  display: none;
+}
+
+.drop-zone.drag-over {
+  border-color: #5c89f3;
+  background: #f4f8ff;
+  transform: translateY(-1px);
+}
+
+.upload-icon {
+  font-size: 3rem;
+  color: #6e8fd9;
+  line-height: 1;
+}
+
+.drop-text {
+  font-size: 1.5rem;
+  color: #384255;
+}
+
+.controls-row {
+  margin-top: 0.9rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.run-btn {
+  border: 0;
+  border-radius: 10px;
+  background: #7a68c6;
+  color: #ffffff;
+  font-weight: 800;
+  padding: 0.72rem 1.25rem;
+  cursor: pointer;
+}
+
+.run-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.file-chip {
+  border: 1px solid #d6dced;
+  border-radius: 999px;
+  padding: 0.45rem 0.78rem;
+  background: #f7f9ff;
+  font-size: 0.92rem;
+  color: #59647d;
+}
+
+.preview-frame {
+  margin-top: 0.9rem;
+  border: 1px solid #d7deee;
+  border-radius: 12px;
+  overflow: hidden;
+  max-width: 280px;
+}
+
+.preview-frame img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  display: block;
+}
+
+.status-text {
+  margin: 0.75rem 0 0;
+  color: #59647d;
+}
+
+.results-block {
+  margin-top: 1.9rem;
+}
+
+.results-block h2 {
+  margin: 0;
+  font-size: 2.05rem;
+  color: #3d4657;
+}
+
+.comparison-card {
+  margin-top: 0.7rem;
+  overflow: hidden;
+}
+
+.header-row,
+.metric-row {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr 1fr;
+}
+
+.header-row {
+  background: #f8f9ff;
+  border-bottom: 1px solid #dbe1ef;
+}
+
+.model-name {
+  padding: 1rem 1.2rem;
+  font-weight: 800;
+  font-size: 1.25rem;
+}
+
+.model-name:first-child {
+  border-right: 1px solid #dbe1ef;
+}
+
+.metric-row {
+  border-bottom: 1px solid #e1e6f3;
+}
+
+.metric-row span,
+.metric-row strong {
+  padding: 0.95rem 1.2rem;
+  font-size: 1.35rem;
+}
+
+.metric-row span {
+  color: #495268;
+}
+
+.metric-row strong {
+  font-weight: 700;
+}
+
+.placeholder-text {
+  margin: 0;
+  padding: 1.1rem 1.2rem;
+  color: #5f6983;
+}
+
+.winner-banner {
+  padding: 0.95rem 1.2rem;
+  font-size: 2rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.winner-eco {
+  background: #3eaa4e;
+}
+
+.winner-ref {
+  background: #6a78d5;
+}
+
+@media (max-width: 760px) {
+  .drop-text {
+    font-size: 1.15rem;
+  }
+
+  .model-name {
+    font-size: 1rem;
+  }
+
+  .metric-row span,
+  .metric-row strong {
+    font-size: 1rem;
+  }
+
+  .winner-banner {
+    font-size: 1.1rem;
+  }
+}

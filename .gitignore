@@ -26,3 +26,6 @@ archived_tests.zip
 backend/archived_tests.zip
 frontend/out/
 frontend/build/
+
+# OS files
+Thumbs.db
