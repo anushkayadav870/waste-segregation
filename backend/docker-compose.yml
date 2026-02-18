@@ -1,0 +1,20 @@
+services:
+  wasteml:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: waste-ml-api
+    env_file: .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - type: bind
+        source: ./gcp_keys
+        target: /app/gcp_keys
+        read_only: true
+    networks:
+      default: null
+
+networks:
+  default:
+    name: backend_default

@@ -13,6 +13,8 @@ type PredictionResult = {
     raw: unknown;
   };
   vision: {
+    prediction: string;
+    confidence: number;
     top_labels: { label: string; confidence: number }[];
     latency_ms: number;
     raw: unknown;

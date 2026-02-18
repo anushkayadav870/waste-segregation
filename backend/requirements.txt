@@ -4,3 +4,13 @@ google-cloud-vision==3.8.1
 google-cloud-aiplatform==1.74.0
 python-multipart==0.0.20
 python-dotenv==1.0.1
+torch>=2.1.0
+torchvision>=0.16.0
+numpy<2
+ftfy
+regex
+tqdm
+openai-clip
+requests
+Pillow
+setuptools==69.5.1

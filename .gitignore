@@ -1,0 +1,28 @@
+# Python Caches
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+backend/__pycache__/
+backend/app/__pycache__/
+
+# Node / Next.js
+node_modules/
+frontend/node_modules/
+frontend/.next/
+.DS_Store
+
+# Secrets and Local Config
+.env
+.env.local
+backend/.env
+frontend/.env.local
+gcp_keys/
+backend/gcp_keys/
+
+# Build artifacts
+archived_tests.zip
+backend/archived_tests.zip
+frontend/out/
+frontend/build/

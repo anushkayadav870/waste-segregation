@@ -1,4 +1,4 @@
-// File: /Users/Sudhanshu/Developer/SRH/waste-ml/frontend/app/page.tsx
+// File: /Users/anushkayadav/Documents/GitHub/Waste-segregation/frontend/app/page.tsx
 import * as entry from '../../../app/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

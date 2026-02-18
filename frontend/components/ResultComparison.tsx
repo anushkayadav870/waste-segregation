@@ -13,6 +13,8 @@ type PredictionResult = {
     raw: unknown;
   };
   vision: {
+    prediction: string;
+    confidence: number;
     top_labels: LabelItem[];
     latency_ms: number;
     raw: unknown;
@@ -29,6 +31,33 @@ type ResultComparisonProps = {
   showVision: boolean;
   showRawJson: boolean;
 };
+
+function StatusBadge({ prediction }: { prediction: string }) {
+  const isUnrecognized = prediction.toLowerCase() === 'unrecognized';
+  const isAmbiguous = prediction.toLowerCase().includes('ambiguous');
+
+  if (isUnrecognized) {
+    return (
+      <span className="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800">
+        Unrecognized (Not Waste)
+      </span>
+    );
+  }
+
+  if (isAmbiguous) {
+    return (
+      <span className="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800">
+        Ambiguous Prediction
+      </span>
+    );
+  }
+
+  return (
+    <span className="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800 uppercase">
+      Confirmed {prediction}
+    </span>
+  );
+}
 
 function InsightCard({ result }: { result: PredictionResult }) {
   const topVision = result.vision.top_labels[0];
@@ -95,9 +124,16 @@ export default function ResultComparison({
       <div className="grid gap-4 md:grid-cols-2">
         {showVertex && (
           <section className="rounded-2xl bg-white p-5 shadow-card">
-            <h3 className="text-lg font-semibold text-ink">Vertex AI (Custom Classifier)</h3>
             <div className="mt-3 space-y-1 text-sm text-slate-700">
-              <p><strong>Predicted class:</strong> {result.vertex.prediction}</p>
+              <div className="flex items-center gap-2">
+                <strong>Predicted class:</strong>
+                <StatusBadge prediction={result.vertex.prediction} />
+              </div>
+              {result.vertex.prediction.includes('ambiguous') && (
+                <p className="text-[10px] text-slate-500 italic ml-1">
+                  * Confidence was below 60% threshold.
+                </p>
+              )}
               <p><strong>Confidence:</strong> {(result.vertex.confidence * 100).toFixed(2)}%</p>
               <p className={result.comparison.faster === 'vertex' ? 'font-semibold text-mint' : ''}>
                 <strong>Latency:</strong> {result.vertex.latency_ms} ms
@@ -113,14 +149,23 @@ export default function ResultComparison({
 
         {showVision && (
           <section className="rounded-2xl bg-white p-5 shadow-card">
-            <h3 className="text-lg font-semibold text-ink">Vision API (General Labels)</h3>
             <div className="mt-3 space-y-1 text-sm text-slate-700">
-              <p><strong>Top label:</strong> {topVision?.label ?? 'N/A'}</p>
-              <p><strong>Top confidence:</strong> {((topVision?.confidence ?? 0) * 100).toFixed(2)}%</p>
+              <div className="flex items-center gap-2">
+                <strong>Predicted class:</strong>
+                <StatusBadge prediction={result.vision.prediction} />
+              </div>
+              {result.vision.prediction.includes('ambiguous') && (
+                <p className="text-[10px] text-slate-500 italic ml-1">
+                  * Confidence was below 60% threshold.
+                </p>
+              )}
+              <p><strong>Confidence:</strong> {(result.vision.confidence * 100).toFixed(2)}%</p>
               <p className={result.comparison.faster === 'vision' ? 'font-semibold text-mint' : ''}>
                 <strong>Latency:</strong> {result.vision.latency_ms} ms
               </p>
-              <p><strong>Additional labels:</strong> {result.vision.top_labels.length}</p>
+              <p className="mt-2 text-xs text-slate-500 italic">
+                Uses keyword mapping from Vision API labels with CLIP fallback.
+              </p>
             </div>
             <ul className="mt-3 space-y-1 text-sm text-slate-700">
               {result.vision.top_labels.map((item) => (

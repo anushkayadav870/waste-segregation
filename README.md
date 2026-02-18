@@ -1,132 +1,86 @@
 # WasteML Compare
 
-WasteML Compare is a full-stack academic demo that compares:
-- Google Vertex AI custom image classification
-- Google Cloud Vision API label detection
+WasteML Compare is a full-stack academic demonstration platform that compares specialized Google Vertex AI classification against a Hybrid Vision + CLIP engine for waste segregation.
 
-It visualizes differences in prediction style, confidence, latency, output format, and practical usability.
+## 🚀 System Features
 
-## Project Structure
+- **Hybrid Engine**: Combines Google Cloud Vision API (label detection) with OpenAI CLIP (zero-shot classification) for highly accurate fallback.
+- **Waste Guard**: A robustness layer that blocks non-waste items (e.g., cars, apples, people) by analyzing domain labels.
+- **Confidence Floors**: Predictions with < 60% confidence are flagged as "ambiguous" to ensure integrity.
+- **Side-by-Side Comparison**: Direct visualization of latency, confidence, and prediction matches between models.
 
-```text
-backend/
-  app/
-    __init__.py
-    main.py
-    vision_service.py
-    vertex_service.py
-  requirements.txt
-  .env.example
+---
 
-frontend/
-  app/
-    globals.css
-    layout.tsx
-    page.tsx
-  components/
-    UploadCard.tsx
-    ResultComparison.tsx
-  package.json
-  next.config.js
-  postcss.config.js
-  tailwind.config.ts
-  tsconfig.json
-  .env.local.example
-```
+## 🛠️ Backend Setup (FastAPI)
 
-## Backend Setup (FastAPI)
+1. **Environment Setup**:
+   ```bash
+   cd backend
+   python3 -m venv .venv
+   source .venv/bin/activate
+   pip install -r requirements.txt
+   ```
 
-1. Create and activate a Python 3.10 virtual environment:
+2. **Configuration**:
+   - Create a `.env` file in the `backend` folder (see `.env.example`).
+   - Ensure your `GOOGLE_APPLICATION_CREDENTIALS` points to a valid service account JSON.
 
-```bash
-cd backend
-python3.10 -m venv .venv
-source .venv/bin/activate
-```
+3. **Execution**:
+   ```bash
+   # Run on port 8005 (to avoid local conflicts)
+   uvicorn main:app --reload --port 8005
+   ```
 
-2. Install dependencies:
+---
 
-```bash
-pip install -r requirements.txt
-```
+## 💻 Frontend Setup (Next.js)
 
-3. Create local env file:
+1. **Installation**:
+   ```bash
+   cd frontend
+   npm install
+   ```
 
-```bash
-cp .env.example .env
-```
+2. **Configuration**:
+   - Create `.env.local` to point to the backend:
+     `NEXT_PUBLIC_API_BASE_URL=http://localhost:8005`
 
-4. Fill `.env` values:
-- `GOOGLE_APPLICATION_CREDENTIALS` - absolute path to your service account JSON
-- `VERTEX_ENDPOINT_ID` - deployed Vertex endpoint ID
-- `PROJECT_ID` - GCP project ID
-- `LOCATION` - endpoint region, e.g. `us-central1`
+3. **Execution**:
+   ```bash
+   # Defaults to port 3000 or 3001
+   npm run dev
+   ```
 
-5. Run API:
+---
 
-```bash
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-```
+## 📤 Pushing to Development
 
-Health check: `http://localhost:8000/health`
+Follow these steps to push your changes to the `dev` branch:
 
-## Frontend Setup (Next.js 14)
+1. **Stage Changes**:
+   ```bash
+   git add .
+   ```
 
-1. Install dependencies:
+2. **Commit**:
+   ```bash
+   git commit -m "feat: complete integration, robust waste-guard, and hybrid engine polish"
+   ```
 
-```bash
-cd frontend
-npm install
-```
+3. **Push**:
+   ```bash
+   # Ensure you are on the dev branch (or creates it if it doesn't exist)
+   git checkout -b dev
+   git push origin dev
+   ```
 
-2. Create frontend env file:
+---
 
-```bash
-cp .env.local.example .env.local
-```
+## 📂 Project Structure Note
+- Key business logic: `backend/app/vision_clip_service.py` and `backend/main.py`.
+- Archived development scripts can be found in `archived_tests.zip`.
 
-3. Confirm backend URL in `.env.local`:
-- `NEXT_PUBLIC_API_BASE_URL=http://localhost:8000`
+---
 
-4. Start frontend:
-
-```bash
-npm run dev
-```
-
-Open: `http://localhost:3000`
-
-## API Contract
-
-`POST /predict` with form-data key `file` (image)
-
-Example response:
-
-```json
-{
-  "vertex": {
-    "prediction": "plastic",
-    "confidence": 0.97,
-    "latency_ms": 320.4,
-    "raw": {}
-  },
-  "vision": {
-    "top_labels": [
-      { "label": "Plastic", "confidence": 0.94 },
-      { "label": "Bottle", "confidence": 0.91 }
-    ],
-    "latency_ms": 180.2,
-    "raw": {}
-  },
-  "comparison": {
-    "faster": "vision",
-    "prediction_match": true
-  }
-}
-```
-
-## Notes
-
-- Backend currently allows `image/jpeg`, `image/png`, and `image/webp` up to 10MB.
-- CORS is enabled for `http://localhost:3000`.
-- Vertex response parsing supports common custom classifier output shapes and includes fallback parsing.
+## ⚖️ License
+Academic/Research Use Only.
