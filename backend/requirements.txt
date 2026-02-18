@@ -4,3 +4,4 @@ google-cloud-vision==3.8.1
 google-cloud-aiplatform==1.74.0
 python-multipart==0.0.20
 python-dotenv==1.0.1
+pillow==11.0.0

@@ -69,9 +69,22 @@ async def predict(file: UploadFile = File(...)) -> dict:
 
     try:
         if vertex_service:
-            vertex_start = time.perf_counter()
-            vertex_result = vertex_service.predict(image_bytes)
-            vertex_latency_ms = round((time.perf_counter() - vertex_start) * 1000, 2)
+            try:
+                vertex_start = time.perf_counter()
+                vertex_result = vertex_service.predict(image_bytes)
+                vertex_latency_ms = round((time.perf_counter() - vertex_start) * 1000, 2)
+            except Exception as vertex_exc:  # noqa: BLE001 keep Vision alive
+                instances = getattr(vertex_exc, "instances", None)
+                vertex_result = {
+                    "prediction": "error",
+                    "confidence": 0.0,
+                    "raw": {
+                        "message": str(vertex_exc),
+                        "request_instances": instances,
+                    },
+                }
+                vertex_latency_ms = None
+                vertex_error = str(vertex_exc)
         else:
             vertex_result = {
                 "prediction": "not_run",
@@ -84,10 +97,9 @@ async def predict(file: UploadFile = File(...)) -> dict:
         vision_result = vision_service.detect_labels(image_bytes)
         vision_latency_ms = round((time.perf_counter() - vision_start) * 1000, 2)
 
-        if vertex_service:
-            faster = "vertex" if vertex_latency_ms < vision_latency_ms else "vision"
-        else:
-            faster = "vision"
+        faster = "vision"
+        if vertex_service and vertex_latency_ms is not None and vertex_latency_ms < vision_latency_ms:
+            faster = "vertex"
 
         return {
             "vertex": {
@@ -104,11 +116,11 @@ async def predict(file: UploadFile = File(...)) -> dict:
                 "raw": vision_result["raw"],
             },
             "comparison": {
-                "faster": "vision" if not vertex_service or vision_latency_ms <= vertex_latency_ms else "vertex",
+                "faster": faster,
                 "prediction_match": _prediction_match(
                     vertex_result["prediction"],
                     [item["label"] for item in vision_result["top_labels"]],
-                ) if vertex_service else False,
+                ) if vertex_service and vertex_latency_ms is not None else False,
             },
         }
     except Exception as exc:
