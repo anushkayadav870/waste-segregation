@@ -44,5 +44,6 @@ class ClipService:
         return {
             "prediction": best_class,
             "confidence": round(scores[best_class], 4),
+            "precision": float(scores[best_class]),
             "raw": scores,
         }

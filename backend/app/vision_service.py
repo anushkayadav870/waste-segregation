@@ -22,6 +22,7 @@ class VisionService:
             {
                 "label": annotation.description,
                 "confidence": round(float(annotation.score), 4),
+                "precision": float(annotation.score),
             }
             for annotation in response.label_annotations
         ]

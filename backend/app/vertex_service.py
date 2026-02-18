@@ -6,6 +6,8 @@ from io import BytesIO
 from typing import Any
 
 import requests
+import time
+from .model_metadata import VERTEX_METRICS
 import google.auth
 import google.auth.transport.requests
 from PIL import Image
@@ -120,7 +122,8 @@ class VertexService:
             return {
                 "prediction": clean_label,
                 "confidence": round(float(scores[idx]), 4),
+                "precision": VERTEX_METRICS.get(clean_label, 0.0),
                 "time": 0.0,
             }
 
-        return {"prediction": "unknown", "confidence": 0.0, "time": 0.0}
+        return {"prediction": "unknown", "confidence": 0.0, "precision": 0.0, "time": 0.0}

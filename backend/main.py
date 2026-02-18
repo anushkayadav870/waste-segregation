@@ -5,8 +5,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, File, HTTPException, UploadFile, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 
 from app.vertex_service import VertexService
 from app.vision_service import VisionService
@@ -66,10 +69,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Template and Static File Setup
+templates = Jinja2Templates(directory="templates")
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
 # Domain Guard Config
 NEGATIVE_DOMAINS = {"fruit", "vehicle", "animal", "person", "plant", "food", "organism", "clothing", "car", "automotive", "mammal", "wheel"}
 POSITIVE_INDICATORS = {"waste", "trash", "garbage", "container", "packaging", "recycling", "bottle", "can", "box"}
 CONFIDENCE_THRESHOLD = 0.60
+
+@app.get("/", response_class=HTMLResponse)
+async def home(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
@@ -116,22 +127,74 @@ async def predict(file: UploadFile = File(...)):
     match = v_pred.lower() == vc_pred.lower()
     faster = "vertex" if v_latency < vc_latency else "vision"
 
+    # Consensus Reasoning (Multi-Label Validation & Tie-Breaking)
+    raw_v_pred = vertex_res.get("prediction", "disabled").lower()
+    
+    # 1. Multi-Label Validation: Check if Vertex pred is in Vision's descriptive labels
+    is_validated = any(raw_v_pred in label for label in vision_labels)
+    
+    # 2. Recommendation Logic
+    recommendation = v_pred
+    reasoning = "Vertex AI (Custom) and Pretrained Models are in full agreement."
+    reliability = max(v_conf, vc_conf)
+
+    if is_unrecognized:
+        recommendation = "unrecognized"
+        reasoning = "Both models agree this item is outside the waste domain (Waste Guard trigger)."
+        reliability = 1.0
+    elif not match:
+        if is_validated:
+            recommendation = v_pred
+            reasoning = f"Vertex predicted '{v_pred}', which was validated by Vision's descriptive labels."
+        else:
+            # Tie-break: Priority to Custom Model for specific waste classes
+            recommendation = v_pred
+            reasoning = f"Models disagree. Prioritizing Vertex AI as the domain specialist for waste classification."
+            reliability = v_conf * 0.9 # Slight penalty for disagreement
+
+    if "ambiguous" in v_pred and "ambiguous" in vc_pred:
+        recommendation = "ambiguous"
+        reasoning = "Both models are uncertain. Please provide a clearer image."
+        reliability = 0.5
+
     return {
+        "consensus": {
+            "recommendation": recommendation,
+            "reasoning": reasoning,
+            "reliability": round(reliability, 2),
+            "is_validated_by_vision": is_validated,
+            "prediction_match": match,
+            "faster_model": faster
+        },
         "vertex": {
             "prediction": v_pred,
             "confidence": v_conf,
+            "precision": vertex_res.get("precision", v_conf),
             "latency_ms": v_latency,
-            "raw": vertex_res.get("raw", {}),
+            "raw": {
+                **vertex_res.get("raw", {}),
+                "waste_guard": {
+                    "is_negative": is_negative,
+                    "has_positive": has_positive,
+                    "is_unrecognized": is_unrecognized,
+                    "threshold_applied": v_conf < CONFIDENCE_THRESHOLD
+                }
+            },
         },
         "vision": {
             "prediction": vc_pred,
             "confidence": vc_conf,
+            "precision": vc_res.get("precision", vc_conf),
             "top_labels": vc_res.get("top_labels", []),
             "latency_ms": vc_latency,
-            "raw": vc_res.get("raw", {}),
-        },
-        "comparison": {
-            "faster": faster,
-            "prediction_match": match,
-        },
+            "raw": {
+                **vc_res.get("raw", {}),
+                "waste_guard": {
+                    "is_negative": is_negative,
+                    "has_positive": has_positive,
+                    "is_unrecognized": is_unrecognized,
+                    "threshold_applied": vc_conf < CONFIDENCE_THRESHOLD
+                }
+            },
+        }
     }
